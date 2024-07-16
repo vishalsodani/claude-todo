@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        form { margin-bottom: 20px; }
+        ul { list-style-type: none; padding: 0; }
+        li { margin-bottom: 10px; }
+        .completed { text-decoration: line-through; color: #888; }
+        .date { font-size: 0.8em; color: #666; }
+        .overdue { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Todo List</h1>
+    <p>Welcome, {{ current_user.id }}! <a href="{{ url_for('logout') }}">Logout</a></p>
+    
+    <form method="POST">
+        <input type="text" name="task" placeholder="Enter a new task" required>
+        <input type="date" name="due_date">
+        <button type="submit" name="add">Add Task</button>
+    </form>
+
+    <form method="POST">
+        <input type="text" name="search" placeholder="Search tasks" value="{{ search if search else '' }}">
+        <button type="submit">Search</button>
+    </form>
+
+    <ul>
+        {% for todo in todos %}
+            <li class="{{ 'completed' if todo[2] else '' }}">
+                {{ todo[1] }}
+                <span class="date">
+                    Added: {{ todo[3] }}
+                    {% if todo[2] %}
+                        | Completed: {{ todo[4] }}
+                    {% endif %}
+                    {% if todo[5] %}
+                        | Due: <span class="{{ 'overdue' if todo[5] < now.strftime('%Y-%m-%d') and not todo[2] else '' }}">{{ todo[5] }}</span>
+                    {% endif %}
+                </span>
+                {% if not todo[2] %}
+                    <form method="POST" style="display: inline;">
+                        <button type="submit" name="complete" value="{{ todo[0] }}">Complete</button>
+                    </form>
+                {% endif %}
+                <form method="POST" style="display: inline;">
+                    <button type="submit" name="delete" value="{{ todo[0] }}">Delete</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <script>
+        // Set min date for due date input to today
+        document.querySelector('input[name="due_date"]').min = new Date().toISOString().split("T")[0];
+    </script>
+</body>
+</html>
